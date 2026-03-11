@@ -1,0 +1,218 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+
+  InternetGatewayId:
+    Type: String
+
+  NATGatewayId:
+    Type: String
+
+
+# -------- ROUTE TABLE 1 --------
+
+  RouteTable1Name:
+    Type: String
+
+  RouteTable1Target:
+    Type: String
+    AllowedValues:
+      - IGW
+      - NAT
+
+  RouteTable1Subnet:
+    Type: AWS::EC2::Subnet::Id
+
+
+# -------- ROUTE TABLE 2 --------
+
+  RouteTable2Enabled:
+    Type: String
+    Default: false
+    AllowedValues: [true, false]
+
+  RouteTable2Name:
+    Type: String
+
+  RouteTable2Target:
+    Type: String
+    AllowedValues:
+      - IGW
+      - NAT
+
+  RouteTable2Subnet:
+    Type: AWS::EC2::Subnet::Id
+
+
+# -------- ROUTE TABLE 3 --------
+
+  RouteTable3Enabled:
+    Type: String
+    Default: false
+    AllowedValues: [true, false]
+
+  RouteTable3Name:
+    Type: String
+
+  RouteTable3Target:
+    Type: String
+    AllowedValues:
+      - IGW
+      - NAT
+
+  RouteTable3Subnet:
+    Type: AWS::EC2::Subnet::Id
+
+
+# -------- ROUTE TABLE 4 --------
+
+  RouteTable4Enabled:
+    Type: String
+    Default: false
+    AllowedValues: [true, false]
+
+  RouteTable4Name:
+    Type: String
+
+  RouteTable4Target:
+    Type: String
+    AllowedValues:
+      - IGW
+      - NAT
+
+  RouteTable4Subnet:
+    Type: AWS::EC2::Subnet::Id
+
+
+Conditions:
+
+  CreateRT2: !Equals [!Ref RouteTable2Enabled, true]
+  CreateRT3: !Equals [!Ref RouteTable3Enabled, true]
+  CreateRT4: !Equals [!Ref RouteTable4Enabled, true]
+
+  RT1IGW: !Equals [!Ref RouteTable1Target, IGW]
+  RT2IGW: !Equals [!Ref RouteTable2Target, IGW]
+  RT3IGW: !Equals [!Ref RouteTable3Target, IGW]
+  RT4IGW: !Equals [!Ref RouteTable4Target, IGW]
+
+
+Resources:
+
+# -------- ROUTE TABLE 1 --------
+
+  RouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPCId
+      Tags:
+        - Key: Name
+          Value: !Ref RouteTable1Name
+
+
+  Route1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !If [RT1IGW, !Ref InternetGatewayId, !Ref "AWS::NoValue"]
+      NatGatewayId: !If [RT1IGW, !Ref "AWS::NoValue", !Ref NATGatewayId]
+
+
+  RT1Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref RouteTable1Subnet
+      RouteTableId: !Ref RouteTable1
+
+
+# -------- ROUTE TABLE 2 --------
+
+  RouteTable2:
+    Type: AWS::EC2::RouteTable
+    Condition: CreateRT2
+    Properties:
+      VpcId: !Ref VPCId
+      Tags:
+        - Key: Name
+          Value: !Ref RouteTable2Name
+
+
+  Route2:
+    Type: AWS::EC2::Route
+    Condition: CreateRT2
+    Properties:
+      RouteTableId: !Ref RouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !If [RT2IGW, !Ref InternetGatewayId, !Ref "AWS::NoValue"]
+      NatGatewayId: !If [RT2IGW, !Ref "AWS::NoValue", !Ref NATGatewayId]
+
+
+  RT2Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: CreateRT2
+    Properties:
+      SubnetId: !Ref RouteTable2Subnet
+      RouteTableId: !Ref RouteTable2
+
+
+# -------- ROUTE TABLE 3 --------
+
+  RouteTable3:
+    Type: AWS::EC2::RouteTable
+    Condition: CreateRT3
+    Properties:
+      VpcId: !Ref VPCId
+      Tags:
+        - Key: Name
+          Value: !Ref RouteTable3Name
+
+
+  Route3:
+    Type: AWS::EC2::Route
+    Condition: CreateRT3
+    Properties:
+      RouteTableId: !Ref RouteTable3
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !If [RT3IGW, !Ref InternetGatewayId, !Ref "AWS::NoValue"]
+      NatGatewayId: !If [RT3IGW, !Ref "AWS::NoValue", !Ref NATGatewayId]
+
+
+  RT3Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: CreateRT3
+    Properties:
+      SubnetId: !Ref RouteTable3Subnet
+      RouteTableId: !Ref RouteTable3
+
+
+# -------- ROUTE TABLE 4 --------
+
+  RouteTable4:
+    Type: AWS::EC2::RouteTable
+    Condition: CreateRT4
+    Properties:
+      VpcId: !Ref VPCId
+      Tags:
+        - Key: Name
+          Value: !Ref RouteTable4Name
+
+
+  Route4:
+    Type: AWS::EC2::Route
+    Condition: CreateRT4
+    Properties:
+      RouteTableId: !Ref RouteTable4
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !If [RT4IGW, !Ref InternetGatewayId, !Ref "AWS::NoValue"]
+      NatGatewayId: !If [RT4IGW, !Ref "AWS::NoValue", !Ref NATGatewayId]
+
+
+  RT4Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: CreateRT4
+    Properties:
+      SubnetId: !Ref RouteTable4Subnet
+      RouteTableId: !Ref RouteTable4
