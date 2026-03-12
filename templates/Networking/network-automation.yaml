@@ -1,0 +1,389 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: StackForge 3-Tier HA Networking Template
+
+Parameters:
+
+  VPCCidr:
+    Type: String
+    Description: CIDR block for VPC
+    Default: 10.0.0.0/16
+
+  AZCount:
+    Type: Number
+    Description: Number of Availability Zones for HA
+    Default: 1
+    AllowedValues:
+      - 1
+      - 2
+      - 3
+
+
+Conditions:
+
+  UseAZ2: !Equals [!Ref AZCount, 2]
+
+  UseAZ3: !Equals [!Ref AZCount, 3]
+
+
+Resources:
+
+# ---------------- VPC ----------------
+
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCidr
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: StackForgeVPC
+
+
+# ---------------- AZ LOOKUP ----------------
+
+  Dummy:
+    Type: AWS::CloudFormation::WaitConditionHandle
+
+
+# ---------------- CIDR CALCULATION ----------------
+
+  # Creates up to 12 subnets (3 AZ × 4 tiers)
+
+  # Used via !Select later
+
+
+# ---------------- IGW ----------------
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+
+# ---------------- SUBNET CIDRS ----------------
+
+  # CloudFormation will generate CIDRs dynamically
+
+# ---------------- SUBNETS AZ1 ----------------
+
+  PublicSubnetAZ1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: !Select [0, !Cidr [!Ref VPCCidr, 12, 8]]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: Public-AZ1
+
+
+  UIPrivateSubnetAZ1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: !Select [1, !Cidr [!Ref VPCCidr, 12, 8]]
+      Tags:
+        - Key: Name
+          Value: UI-AZ1
+
+
+  BackendPrivateSubnetAZ1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: !Select [2, !Cidr [!Ref VPCCidr, 12, 8]]
+      Tags:
+        - Key: Name
+          Value: Backend-AZ1
+
+
+  DatabasePrivateSubnetAZ1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: !Select [3, !Cidr [!Ref VPCCidr, 12, 8]]
+      Tags:
+        - Key: Name
+          Value: Database-AZ1
+
+
+# ---------------- SUBNETS AZ2 ----------------
+
+  PublicSubnetAZ2:
+    Type: AWS::EC2::Subnet
+    Condition: UseAZ2
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Select [4, !Cidr [!Ref VPCCidr, 12, 8]]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: Public-AZ2
+
+
+  UIPrivateSubnetAZ2:
+    Type: AWS::EC2::Subnet
+    Condition: UseAZ2
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Select [5, !Cidr [!Ref VPCCidr, 12, 8]]
+      Tags:
+        - Key: Name
+          Value: UI-AZ2
+
+
+  BackendPrivateSubnetAZ2:
+    Type: AWS::EC2::Subnet
+    Condition: UseAZ2
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Select [6, !Cidr [!Ref VPCCidr, 12, 8]]
+      Tags:
+        - Key: Name
+          Value: Backend-AZ2
+
+
+  DatabasePrivateSubnetAZ2:
+    Type: AWS::EC2::Subnet
+    Condition: UseAZ2
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Select [7, !Cidr [!Ref VPCCidr, 12, 8]]
+      Tags:
+        - Key: Name
+          Value: Database-AZ2
+
+
+# ---------------- SUBNETS AZ3 ----------------
+
+  PublicSubnetAZ3:
+    Type: AWS::EC2::Subnet
+    Condition: UseAZ3
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Select [8, !Cidr [!Ref VPCCidr, 12, 8]]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: Public-AZ3
+
+
+  UIPrivateSubnetAZ3:
+    Type: AWS::EC2::Subnet
+    Condition: UseAZ3
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Select [9, !Cidr [!Ref VPCCidr, 12, 8]]
+      Tags:
+        - Key: Name
+          Value: UI-AZ3
+
+
+  BackendPrivateSubnetAZ3:
+    Type: AWS::EC2::Subnet
+    Condition: UseAZ3
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Select [10, !Cidr [!Ref VPCCidr, 12, 8]]
+      Tags:
+        - Key: Name
+          Value: Backend-AZ3
+
+
+  DatabasePrivateSubnetAZ3:
+    Type: AWS::EC2::Subnet
+    Condition: UseAZ3
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Select [11, !Cidr [!Ref VPCCidr, 12, 8]]
+      Tags:
+        - Key: Name
+          Value: Database-AZ3
+
+
+
+# ---------------- NAT ----------------
+
+  NatEIP:
+    Type: AWS::EC2::EIP
+    DependsOn: AttachGateway
+    Properties:
+      Domain: vpc
+
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatEIP.AllocationId
+      SubnetId: !Ref PublicSubnetAZ1
+
+
+# ---------------- ROUTE TABLES ----------------
+
+  PublicRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  UIRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  BackendRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  DatabaseRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+
+# ---------------- ROUTES ----------------
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRT
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+
+  UIRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref UIRT
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
+
+  BackendRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref BackendRT
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
+
+# ---------------- ASSOCIATIONS ----------------
+
+  PublicSubnet1Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRT
+      SubnetId: !Ref PublicSubnetAZ1
+
+
+  PublicSubnet2Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: UseAZ2
+    Properties:
+      RouteTableId: !Ref PublicRT
+      SubnetId: !Ref PublicSubnetAZ2
+
+  PublicSubnet3Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: UseAZ3
+    Properties:
+      RouteTableId: !Ref PublicRT
+      SubnetId: !Ref PublicSubnetAZ3
+
+
+  UISubnet1Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref UIRT
+      SubnetId: !Ref UIPrivateSubnetAZ1
+
+  UISubnet2Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: UseAZ2
+    Properties:
+      RouteTableId: !Ref UIRT
+      SubnetId: !Ref UIPrivateSubnetAZ2
+
+  UISubnet3Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: UseAZ3
+    Properties:
+      RouteTableId: !Ref UIRT
+      SubnetId: !Ref UIPrivateSubnetAZ3
+
+
+  BackendSubnet1Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref BackendRT
+      SubnetId: !Ref BackendPrivateSubnetAZ1
+
+  BackendSubnet2Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: UseAZ2
+    Properties:
+      RouteTableId: !Ref BackendRT
+      SubnetId: !Ref BackendPrivateSubnetAZ2
+
+  BackendSubnet3Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: UseAZ3
+    Properties:
+      RouteTableId: !Ref BackendRT
+      SubnetId: !Ref BackendPrivateSubnetAZ3
+
+
+  DatabaseSubnet1Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref DatabaseRT
+      SubnetId: !Ref DatabasePrivateSubnetAZ1
+
+  DatabaseSubnet2Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: UseAZ2
+    Properties:
+      RouteTableId: !Ref DatabaseRT
+      SubnetId: !Ref DatabasePrivateSubnetAZ2
+
+  DatabaseSubnet3Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: UseAZ3
+    Properties:
+      RouteTableId: !Ref DatabaseRT
+      SubnetId: !Ref DatabasePrivateSubnetAZ3
+
+
+Outputs:
+
+  VPCId:
+    Value: !Ref VPC
+
+  PublicSubnetAZ1:
+    Value: !Ref PublicSubnetAZ1
+
+  UIPrivateSubnetAZ1:
+    Value: !Ref UIPrivateSubnetAZ1
+
+  BackendPrivateSubnetAZ1:
+    Value: !Ref BackendPrivateSubnetAZ1
+
+  DatabasePrivateSubnetAZ1:
+    Value: !Ref DatabasePrivateSubnetAZ1
