@@ -1,0 +1,552 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+
+      - Label:
+          default: "VPC Configuration"
+        Parameters:
+          - VPCName
+          - VPCCidr
+
+      - Label:
+          default: "NAT Gateway Configuration"
+        Parameters:
+          - NatGatewaySubnet
+
+      - Label:
+          default: "Subnet 1 Configuration"
+        Parameters:
+          - Subnet1Enabled
+          - Subnet1Name
+          - Subnet1Description
+          - Subnet1CIDR
+          - Subnet1AZ
+
+      - Label:
+          default: "Subnet 2 Configuration"
+        Parameters:
+          - Subnet2Enabled
+          - Subnet2Name
+          - Subnet2Description
+          - Subnet2CIDR
+          - Subnet2AZ
+
+      - Label:
+          default: "Subnet 3 Configuration"
+        Parameters:
+          - Subnet3Enabled
+          - Subnet3Name
+          - Subnet3Description
+          - Subnet3CIDR
+          - Subnet3AZ
+
+      - Label:
+          default: "Subnet 4 Configuration"
+        Parameters:
+          - Subnet4Enabled
+          - Subnet4Name
+          - Subnet4Description
+          - Subnet4CIDR
+          - Subnet4AZ
+
+      - Label:
+          default: "Subnet 5 Configuration"
+        Parameters:
+          - Subnet5Enabled
+          - Subnet5Name
+          - Subnet5Description
+          - Subnet5CIDR
+          - Subnet5AZ
+
+      - Label:
+          default: "Subnet 6 Configuration"
+        Parameters:
+          - Subnet6Enabled
+          - Subnet6Name
+          - Subnet6Description
+          - Subnet6CIDR
+          - Subnet6AZ
+
+      - Label:
+          default: "Subnet 7 Configuration"
+        Parameters:
+          - Subnet7Enabled
+          - Subnet7Name
+          - Subnet7Description
+          - Subnet7CIDR
+          - Subnet7AZ
+
+      - Label:
+          default: "Subnet 8 Configuration"
+        Parameters:
+          - Subnet8Enabled
+          - Subnet8Name
+          - Subnet8Description
+          - Subnet8CIDR
+          - Subnet8AZ
+
+
+Parameters:
+
+# ---------------- VPC ----------------
+
+  VPCName:
+    Type: String
+
+  VPCCidr:
+    Type: String
+    Default: 192.168.0.0/16
+
+
+# ---------------- NAT CONFIG ----------------
+
+  NatGatewaySubnet:
+    Type: String
+    Default: Subnet1
+    AllowedValues:
+      - Subnet1
+      - Subnet2
+      - Subnet3
+      - Subnet4
+      - Subnet5
+      - Subnet6
+      - Subnet7
+      - Subnet8
+
+
+# ---------------- SUBNET PARAMETERS ----------------
+
+  Subnet1Enabled:
+    Type: String
+    Default: true
+    AllowedValues: [true, false]
+
+  Subnet1Name:
+    Type: String
+
+  Subnet1Description:
+    Type: String
+
+  Subnet1CIDR:
+    Type: String
+    Default: 192.168.1.0/24
+
+  Subnet1AZ:
+    Type: AWS::EC2::AvailabilityZone::Name
+
+
+  Subnet2Enabled:
+    Type: String
+    Default: false
+    AllowedValues: [true, false]
+
+  Subnet2Name:
+    Type: String
+
+  Subnet2Description:
+    Type: String
+
+  Subnet2CIDR:
+    Type: String
+    Default: 192.168.2.0/24
+
+  Subnet2AZ:
+    Type: AWS::EC2::AvailabilityZone::Name
+
+
+  Subnet3Enabled:
+    Type: String
+    Default: false
+    AllowedValues: [true, false]
+
+  Subnet3Name:
+    Type: String
+
+  Subnet3Description:
+    Type: String
+
+  Subnet3CIDR:
+    Type: String
+    Default: 192.168.3.0/24
+
+  Subnet3AZ:
+    Type: AWS::EC2::AvailabilityZone::Name
+
+
+  Subnet4Enabled:
+    Type: String
+    Default: false
+    AllowedValues: [true, false]
+
+  Subnet4Name:
+    Type: String
+
+  Subnet4Description:
+    Type: String
+
+  Subnet4CIDR:
+    Type: String
+    Default: 192.168.4.0/24
+
+  Subnet4AZ:
+    Type: AWS::EC2::AvailabilityZone::Name
+
+
+  Subnet5Enabled:
+    Type: String
+    Default: false
+    AllowedValues: [true, false]
+
+  Subnet5Name:
+    Type: String
+
+  Subnet5Description:
+    Type: String
+
+  Subnet5CIDR:
+    Type: String
+    Default: 192.168.5.0/24
+
+  Subnet5AZ:
+    Type: AWS::EC2::AvailabilityZone::Name
+
+
+  Subnet6Enabled:
+    Type: String
+    Default: false
+    AllowedValues: [true, false]
+
+  Subnet6Name:
+    Type: String
+
+  Subnet6Description:
+    Type: String
+
+  Subnet6CIDR:
+    Type: String
+    Default: 192.168.6.0/24
+
+  Subnet6AZ:
+    Type: AWS::EC2::AvailabilityZone::Name
+
+
+  Subnet7Enabled:
+    Type: String
+    Default: false
+    AllowedValues: [true, false]
+
+  Subnet7Name:
+    Type: String
+
+  Subnet7Description:
+    Type: String
+
+  Subnet7CIDR:
+    Type: String
+    Default: 192.168.7.0/24
+
+  Subnet7AZ:
+    Type: AWS::EC2::AvailabilityZone::Name
+
+
+  Subnet8Enabled:
+    Type: String
+    Default: false
+    AllowedValues: [true, false]
+
+  Subnet8Name:
+    Type: String
+
+  Subnet8Description:
+    Type: String
+
+  Subnet8CIDR:
+    Type: String
+    Default: 192.168.8.0/24
+
+  Subnet8AZ:
+    Type: AWS::EC2::AvailabilityZone::Name
+
+
+Conditions:
+
+  CreateSubnet1: !Equals [!Ref Subnet1Enabled, true]
+  CreateSubnet2: !Equals [!Ref Subnet2Enabled, true]
+  CreateSubnet3: !Equals [!Ref Subnet3Enabled, true]
+  CreateSubnet4: !Equals [!Ref Subnet4Enabled, true]
+  CreateSubnet5: !Equals [!Ref Subnet5Enabled, true]
+  CreateSubnet6: !Equals [!Ref Subnet6Enabled, true]
+  CreateSubnet7: !Equals [!Ref Subnet7Enabled, true]
+  CreateSubnet8: !Equals [!Ref Subnet8Enabled, true]
+
+  UseSubnet1: !Equals [!Ref NatGatewaySubnet, Subnet1]
+  UseSubnet2: !Equals [!Ref NatGatewaySubnet, Subnet2]
+  UseSubnet3: !Equals [!Ref NatGatewaySubnet, Subnet3]
+  UseSubnet4: !Equals [!Ref NatGatewaySubnet, Subnet4]
+  UseSubnet5: !Equals [!Ref NatGatewaySubnet, Subnet5]
+  UseSubnet6: !Equals [!Ref NatGatewaySubnet, Subnet6]
+  UseSubnet7: !Equals [!Ref NatGatewaySubnet, Subnet7]
+  UseSubnet8: !Equals [!Ref NatGatewaySubnet, Subnet8]
+
+
+
+Resources:
+
+# ---------------- VPC ----------------
+
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Ref VPCName
+
+
+# ---------------- IGW ----------------
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+
+# ---------------- NAT ----------------
+
+  NatEIP:
+    Type: AWS::EC2::EIP
+    DependsOn: AttachGateway
+    Properties:
+      Domain: vpc
+
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatEIP.AllocationId
+      SubnetId: !If
+      - UseSubnet1
+      - !Ref Subnet1
+      - !If
+        - UseSubnet2
+        - !Ref Subnet2
+        - !If
+          - UseSubnet3
+          - !Ref Subnet3
+          - !If
+            - UseSubnet4
+            - !Ref Subnet4
+            - !If
+              - UseSubnet5
+              - !Ref Subnet5
+              - !If
+                - UseSubnet6
+                - !Ref Subnet6
+                - !If
+                  - UseSubnet7
+                  - !Ref Subnet7
+                  - !Ref Subnet8
+
+
+# ---------------- SUBNETS ----------------
+
+  Subnet1:
+    Type: AWS::EC2::Subnet
+    Condition: CreateSubnet1
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref Subnet1CIDR
+      AvailabilityZone: !Ref Subnet1AZ
+      Tags:
+        - Key: Name
+          Value: !Ref Subnet1Name
+        - Key: Description
+          Value: !Ref Subnet1Description
+
+
+  Subnet2:
+    Type: AWS::EC2::Subnet
+    Condition: CreateSubnet2
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref Subnet2CIDR
+      AvailabilityZone: !Ref Subnet2AZ
+      Tags:
+        - Key: Name
+          Value: !Ref Subnet2Name
+        - Key: Description
+          Value: !Ref Subnet2Description
+
+
+  Subnet3:
+    Type: AWS::EC2::Subnet
+    Condition: CreateSubnet3
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref Subnet3CIDR
+      AvailabilityZone: !Ref Subnet3AZ
+      Tags:
+        - Key: Name
+          Value: !Ref Subnet3Name
+        - Key: Description
+          Value: !Ref Subnet3Description
+
+
+  Subnet4:
+    Type: AWS::EC2::Subnet
+    Condition: CreateSubnet4
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref Subnet4CIDR
+      AvailabilityZone: !Ref Subnet4AZ
+      Tags:
+        - Key: Name
+          Value: !Ref Subnet4Name
+        - Key: Description
+          Value: !Ref Subnet4Description
+
+
+  Subnet5:
+    Type: AWS::EC2::Subnet
+    Condition: CreateSubnet5
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref Subnet5CIDR
+      AvailabilityZone: !Ref Subnet5AZ
+      Tags:
+        - Key: Name
+          Value: !Ref Subnet5Name
+        - Key: Description
+          Value: !Ref Subnet5Description
+
+
+  Subnet6:
+    Type: AWS::EC2::Subnet
+    Condition: CreateSubnet6
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref Subnet6CIDR
+      AvailabilityZone: !Ref Subnet6AZ
+      Tags:
+        - Key: Name
+          Value: !Ref Subnet6Name
+        - Key: Description
+          Value: !Ref Subnet6Description
+
+
+  Subnet7:
+    Type: AWS::EC2::Subnet
+    Condition: CreateSubnet7
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref Subnet7CIDR
+      AvailabilityZone: !Ref Subnet7AZ
+      Tags:
+        - Key: Name
+          Value: !Ref Subnet7Name
+        - Key: Description
+          Value: !Ref Subnet7Description
+
+
+  Subnet8:
+    Type: AWS::EC2::Subnet
+    Condition: CreateSubnet8
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref Subnet8CIDR
+      AvailabilityZone: !Ref Subnet8AZ
+      Tags:
+        - Key: Name
+          Value: !Ref Subnet8Name
+        - Key: Description
+          Value: !Ref Subnet8Description
+
+
+Outputs:
+
+  VPCId:
+    Value: !Ref VPC
+    Export:
+      Name: !Sub "${AWS::StackName}-VPCId"
+
+  InternetGatewayId:
+    Value: !Ref InternetGateway
+    Export:
+      Name: !Sub "${AWS::StackName}-InternetGatewayId"
+
+  NATGatewayId:
+    Value: !Ref NatGateway
+    Export:
+      Name: !Sub "${AWS::StackName}-NatGatewayId"
+
+  Subnet1Id:
+    Condition: CreateSubnet1
+    Value: !Ref Subnet1
+
+  Subnet1NameOutput:
+    Condition: CreateSubnet1
+    Value: !Ref Subnet1Name
+
+  Subnet2Id:
+    Condition: CreateSubnet2
+    Value: !Ref Subnet2
+
+  Subnet2NameOutput:
+    Condition: CreateSubnet2
+    Value: !Ref Subnet2Name
+
+  Subnet3Id:
+    Condition: CreateSubnet3
+    Value: !Ref Subnet3
+
+  Subnet3NameOutput:
+    Condition: CreateSubnet3
+    Value: !Ref Subnet3Name
+
+  Subnet4Id:
+    Condition: CreateSubnet4
+    Value: !Ref Subnet4
+
+  Subnet4NameOutput:
+    Condition: CreateSubnet4
+    Value: !Ref Subnet4Name
+
+  Subnet5Id:
+    Condition: CreateSubnet5
+    Value: !Ref Subnet5
+
+  Subnet5NameOutput:
+    Condition: CreateSubnet5
+    Value: !Ref Subnet5Name
+
+  Subnet6Id:
+    Condition: CreateSubnet6
+    Value: !Ref Subnet6
+
+  Subnet6NameOutput:
+    Condition: CreateSubnet6
+    Value: !Ref Subnet6Name
+
+  Subnet7Id:
+    Condition: CreateSubnet7
+    Value: !Ref Subnet7
+
+  Subnet7NameOutput:
+    Condition: CreateSubnet7
+    Value: !Ref Subnet7Name
+
+  Subnet8Id:
+    Condition: CreateSubnet8
+    Value: !Ref Subnet8
+
+  Subnet8NameOutput:
+    Condition: CreateSubnet8
+    Value: !Ref Subnet8Name
