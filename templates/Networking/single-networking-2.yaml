@@ -1,0 +1,284 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: StackForge Unified Networking Template
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+
+      - Label:
+          default: VPC Configuration
+        Parameters:
+          - VPCName
+          - VPCCidr
+
+      - Label:
+          default: Subnet 1
+        Parameters:
+          - Subnet1Enabled
+          - Subnet1Name
+          - Subnet1CIDR
+          - Subnet1AZ
+          - Subnet1Role
+
+      - Label:
+          default: Subnet 2
+        Parameters:
+          - Subnet2Enabled
+          - Subnet2Name
+          - Subnet2CIDR
+          - Subnet2AZ
+          - Subnet2Role
+
+
+Parameters:
+
+  VPCName:
+    Type: String
+
+  VPCCidr:
+    Type: String
+    Default: 192.168.0.0/16
+
+  Subnet1Enabled:
+    Type: String
+    Default: true
+    AllowedValues: [true,false]
+
+  Subnet1Name:
+    Type: String
+
+  Subnet1CIDR:
+    Type: String
+    Default: 192.168.1.0/24
+
+  Subnet1AZ:
+    Type: AWS::EC2::AvailabilityZone::Name
+
+  Subnet1Role:
+    Type: String
+    AllowedValues:
+      - public
+      - ui
+      - backend
+      - database
+    Default: public
+
+
+  Subnet2Enabled:
+    Type: String
+    Default: false
+    AllowedValues: [true,false]
+
+  Subnet2Name:
+    Type: String
+
+  Subnet2CIDR:
+    Type: String
+    Default: 192.168.2.0/24
+
+  Subnet2AZ:
+    Type: AWS::EC2::AvailabilityZone::Name
+
+  Subnet2Role:
+    Type: String
+    AllowedValues:
+      - public
+      - ui
+      - backend
+      - database
+    Default: ui
+
+
+Conditions:
+
+  CreateSubnet1: !Equals [!Ref Subnet1Enabled, true]
+  CreateSubnet2: !Equals [!Ref Subnet2Enabled, true]
+
+  Subnet1IsPublic: !Equals [!Ref Subnet1Role, public]
+  Subnet1IsUI: !Equals [!Ref Subnet1Role, ui]
+  Subnet1IsBackend: !Equals [!Ref Subnet1Role, backend]
+  Subnet1IsDatabase: !Equals [!Ref Subnet1Role, database]
+
+  Subnet2IsPublic: !Equals [!Ref Subnet2Role, public]
+  Subnet2IsUI: !Equals [!Ref Subnet2Role, ui]
+  Subnet2IsBackend: !Equals [!Ref Subnet2Role, backend]
+  Subnet2IsDatabase: !Equals [!Ref Subnet2Role, database]
+
+
+Resources:
+
+# ---------------- VPC ----------------
+
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Ref VPCName
+
+
+# ---------------- IGW ----------------
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+
+# ---------------- NAT ----------------
+
+  NatEIP:
+    Type: AWS::EC2::EIP
+    DependsOn: AttachGateway
+    Properties:
+      Domain: vpc
+
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatEIP.AllocationId
+      SubnetId: !Ref Subnet1
+
+
+# ---------------- ROUTE TABLES ----------------
+
+  PublicRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Public_RT
+
+  UIRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: UI_RT
+
+  BackendRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Backend_RT
+
+  DatabaseRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Database_RT
+
+
+# ---------------- ROUTES ----------------
+
+  PublicDefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRT
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+
+  UINatRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref UIRT
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
+
+  BackendNatRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref BackendRT
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
+
+# ---------------- SUBNETS ----------------
+
+  Subnet1:
+    Type: AWS::EC2::Subnet
+    Condition: CreateSubnet1
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref Subnet1CIDR
+      AvailabilityZone: !Ref Subnet1AZ
+      Tags:
+        - Key: Name
+          Value: !Ref Subnet1Name
+
+
+  Subnet2:
+    Type: AWS::EC2::Subnet
+    Condition: CreateSubnet2
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref Subnet2CIDR
+      AvailabilityZone: !Ref Subnet2AZ
+      Tags:
+        - Key: Name
+          Value: !Ref Subnet2Name
+
+
+# ---------------- SUBNET ASSOCIATIONS ----------------
+
+  Subnet1PublicAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: Subnet1IsPublic
+    Properties:
+      SubnetId: !Ref Subnet1
+      RouteTableId: !Ref PublicRT
+
+  Subnet1UIAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: Subnet1IsUI
+    Properties:
+      SubnetId: !Ref Subnet1
+      RouteTableId: !Ref UIRT
+
+  Subnet1BackendAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: Subnet1IsBackend
+    Properties:
+      SubnetId: !Ref Subnet1
+      RouteTableId: !Ref BackendRT
+
+  Subnet1DatabaseAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: Subnet1IsDatabase
+    Properties:
+      SubnetId: !Ref Subnet1
+      RouteTableId: !Ref DatabaseRT
+
+
+Outputs:
+
+  VPCId:
+    Value: !Ref VPC
+
+  PublicRouteTableId:
+    Value: !Ref PublicRT
+
+  UIRouteTableId:
+    Value: !Ref UIRT
+
+  BackendRouteTableId:
+    Value: !Ref BackendRT
+
+  DatabaseRouteTableId:
+    Value: !Ref DatabaseRT

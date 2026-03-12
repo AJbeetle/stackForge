@@ -1,0 +1,410 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: StackForge Single File Networking Template
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+
+      - Label:
+          default: "VPC Configuration"
+        Parameters:
+          - VPCName
+          - VPCCidr
+
+      - Label:
+          default: "Subnet 1"
+        Parameters:
+          - Subnet1Enabled
+          - Subnet1Name
+          - Subnet1CIDR
+          - Subnet1AZ
+          - Subnet1Role
+
+      - Label:
+          default: "Subnet 2"
+        Parameters:
+          - Subnet2Enabled
+          - Subnet2Name
+          - Subnet2CIDR
+          - Subnet2AZ
+          - Subnet2Role
+
+      - Label:
+          default: "Subnet 3"
+        Parameters:
+          - Subnet3Enabled
+          - Subnet3Name
+          - Subnet3CIDR
+          - Subnet3AZ
+          - Subnet3Role
+
+      - Label:
+          default: "Subnet 4"
+        Parameters:
+          - Subnet4Enabled
+          - Subnet4Name
+          - Subnet4CIDR
+          - Subnet4AZ
+          - Subnet4Role
+
+      - Label:
+          default: "Subnet 5"
+        Parameters:
+          - Subnet5Enabled
+          - Subnet5Name
+          - Subnet5CIDR
+          - Subnet5AZ
+          - Subnet5Role
+
+      - Label:
+          default: "Subnet 6"
+        Parameters:
+          - Subnet6Enabled
+          - Subnet6Name
+          - Subnet6CIDR
+          - Subnet6AZ
+          - Subnet6Role
+
+      - Label:
+          default: "Subnet 7"
+        Parameters:
+          - Subnet7Enabled
+          - Subnet7Name
+          - Subnet7CIDR
+          - Subnet7AZ
+          - Subnet7Role
+
+      - Label:
+          default: "Subnet 8"
+        Parameters:
+          - Subnet8Enabled
+          - Subnet8Name
+          - Subnet8CIDR
+          - Subnet8AZ
+          - Subnet8Role
+
+
+Parameters:
+
+VPCName:
+  -Type: String
+
+VPCCidr:
+  Type: String
+  Default: 192.168.0.0/16
+
+
+Subnet1Enabled:
+  Type: String
+  Default: true
+  AllowedValues: [true,false]
+
+Subnet1Name:
+  Type: String
+
+Subnet1CIDR:
+  Type: String
+  Default: 192.168.1.0/24
+
+Subnet1AZ:
+  Type: AWS::EC2::AvailabilityZone::Name
+
+Subnet1Role:
+  Type: String
+  AllowedValues: [public,ui,backend,database]
+  Default: public
+
+
+Subnet2Enabled:
+  Type: String
+  Default: false
+  AllowedValues: [true,false]
+
+Subnet2Name:
+  Type: String
+
+Subnet2CIDR:
+  Type: String
+  Default: 192.168.2.0/24
+
+Subnet2AZ:
+  Type: AWS::EC2::AvailabilityZone::Name
+
+Subnet2Role:
+  Type: String
+  AllowedValues: [public,ui,backend,database]
+  Default: public
+
+
+Subnet3Enabled:
+  Type: String
+  Default: false
+  AllowedValues: [true,false]
+
+Subnet3Name:
+  Type: String
+
+Subnet3CIDR:
+  Type: String
+  Default: 192.168.3.0/24
+
+Subnet3AZ:
+  Type: AWS::EC2::AvailabilityZone::Name
+
+Subnet3Role:
+  Type: String
+  AllowedValues: [public,ui,backend,database]
+  Default: ui
+
+
+Subnet4Enabled:
+  Type: String
+  Default: false
+  AllowedValues: [true,false]
+
+Subnet4Name:
+  Type: String
+
+Subnet4CIDR:
+  Type: String
+  Default: 192.168.4.0/24
+
+Subnet4AZ:
+  Type: AWS::EC2::AvailabilityZone::Name
+
+Subnet4Role:
+  Type: String
+  AllowedValues: [public,ui,backend,database]
+  Default: backend
+
+
+Subnet5Enabled:
+  Type: String
+  Default: false
+  AllowedValues: [true,false]
+
+Subnet5Name:
+  Type: String
+
+Subnet5CIDR:
+  Type: String
+  Default: 192.168.5.0/24
+
+Subnet5AZ:
+  Type: AWS::EC2::AvailabilityZone::Name
+
+Subnet5Role:
+  Type: String
+  AllowedValues: [public,ui,backend,database]
+  Default: database
+
+
+Subnet6Enabled:
+  Type: String
+  Default: false
+  AllowedValues: [true,false]
+
+Subnet6Name:
+  Type: String
+
+Subnet6CIDR:
+  Type: String
+  Default: 192.168.6.0/24
+
+Subnet6AZ:
+  Type: AWS::EC2::AvailabilityZone::Name
+
+Subnet6Role:
+  Type: String
+  AllowedValues: [public,ui,backend,database]
+  Default: database
+
+
+Subnet7Enabled:
+  Type: String
+  Default: false
+  AllowedValues: [true,false]
+
+Subnet7Name:
+  Type: String
+
+Subnet7CIDR:
+  Type: String
+  Default: 192.168.7.0/24
+
+Subnet7AZ:
+  Type: AWS::EC2::AvailabilityZone::Name
+
+Subnet7Role:
+  Type: String
+  AllowedValues: [public,ui,backend,database]
+  Default: backend
+
+
+Subnet8Enabled:
+  Type: String
+  Default: false
+  AllowedValues: [true,false]
+
+Subnet8Name:
+  Type: String
+
+Subnet8CIDR:
+  Type: String
+  Default: 192.168.8.0/24
+
+Subnet8AZ:
+  Type: AWS::EC2::AvailabilityZone::Name
+
+Subnet8Role:
+  Type: String
+  AllowedValues: [public,ui,backend,database]
+  Default: backend
+
+
+Conditions:
+
+CreateSubnet1: !Equals [!Ref Subnet1Enabled,true]
+CreateSubnet2: !Equals [!Ref Subnet2Enabled,true]
+CreateSubnet3: !Equals [!Ref Subnet3Enabled,true]
+CreateSubnet4: !Equals [!Ref Subnet4Enabled,true]
+CreateSubnet5: !Equals [!Ref Subnet5Enabled,true]
+CreateSubnet6: !Equals [!Ref Subnet6Enabled,true]
+CreateSubnet7: !Equals [!Ref Subnet7Enabled,true]
+CreateSubnet8: !Equals [!Ref Subnet8Enabled,true]
+
+
+Resources:
+
+VPC:
+  Type: AWS::EC2::VPC
+  Properties:
+    CidrBlock: !Ref VPCCidr
+    EnableDnsSupport: true
+    EnableDnsHostnames: true
+    Tags:
+      - Key: Name
+        Value: !Ref VPCName
+
+
+InternetGateway:
+  Type: AWS::EC2::InternetGateway
+
+AttachGateway:
+  Type: AWS::EC2::VPCGatewayAttachment
+  Properties:
+    InternetGatewayId: !Ref InternetGateway
+    VpcId: !Ref VPC
+
+
+NatEIP:
+  Type: AWS::EC2::EIP
+  DependsOn: AttachGateway
+  Properties:
+    Domain: vpc
+
+
+NatGateway:
+  Type: AWS::EC2::NatGateway
+  Properties:
+    AllocationId: !GetAtt NatEIP.AllocationId
+    SubnetId: !Ref Subnet1
+
+
+PublicRouteTable:
+  Type: AWS::EC2::RouteTable
+  Properties:
+    VpcId: !Ref VPC
+    Tags:
+      - Key: Name
+        Value: Public_RT
+
+
+UIRouteTable:
+  Type: AWS::EC2::RouteTable
+  Properties:
+    VpcId: !Ref VPC
+    Tags:
+      - Key: Name
+        Value: UI_RT
+
+
+BackendRouteTable:
+  Type: AWS::EC2::RouteTable
+  Properties:
+    VpcId: !Ref VPC
+    Tags:
+      - Key: Name
+        Value: Backend_RT
+
+
+DatabaseRouteTable:
+  Type: AWS::EC2::RouteTable
+  Properties:
+    VpcId: !Ref VPC
+    Tags:
+      - Key: Name
+        Value: Database_RT
+
+
+PublicDefaultRoute:
+  Type: AWS::EC2::Route
+  Properties:
+    RouteTableId: !Ref PublicRouteTable
+    DestinationCidrBlock: 0.0.0.0/0
+    GatewayId: !Ref InternetGateway
+
+
+UIRoute:
+  Type: AWS::EC2::Route
+  Properties:
+    RouteTableId: !Ref UIRouteTable
+    DestinationCidrBlock: 0.0.0.0/0
+    NatGatewayId: !Ref NatGateway
+
+
+BackendRoute:
+  Type: AWS::EC2::Route
+  Properties:
+    RouteTableId: !Ref BackendRouteTable
+    DestinationCidrBlock: 0.0.0.0/0
+    NatGatewayId: !Ref NatGateway
+
+
+Subnet1:
+  Type: AWS::EC2::Subnet
+  Condition: CreateSubnet1
+  Properties:
+    VpcId: !Ref VPC
+    CidrBlock: !Ref Subnet1CIDR
+    AvailabilityZone: !Ref Subnet1AZ
+    Tags:
+      - Key: Name
+        Value: !Ref Subnet1Name
+
+
+Subnet1PublicAssociation:
+  Type: AWS::EC2::SubnetRouteTableAssociation
+  Condition: CreateSubnet1
+  Properties:
+    SubnetId: !Ref Subnet1
+    RouteTableId: !If
+      - CreateSubnet1
+      - !If
+        - !Equals [!Ref Subnet1Role, public]
+        - !Ref PublicRouteTable
+        - !If
+          - !Equals [!Ref Subnet1Role, ui]
+          - !Ref UIRouteTable
+          - !If
+            - !Equals [!Ref Subnet1Role, backend]
+            - !Ref BackendRouteTable
+            - !Ref DatabaseRouteTable
+      - !Ref PublicRouteTable
+
+
+Outputs:
+
+VPCId:
+  Value: !Ref VPC
