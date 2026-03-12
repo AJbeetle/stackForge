@@ -1,6 +1,31 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+
+      - Label:
+          default: "VPC Configuration"
+        Parameters:
+          - VPCName
+          - VPCCidr
+
+      - Label:
+          default: "Subnet Configuration"
+        Parameters:
+          - SubnetCIDRs
+          - SubnetAZs
+          - SubnetNames
+          - SubnetDescriptions
+
+      - Label:
+          default: "NAT Gateway Configuration"
+        Parameters:
+          - NatGatewaySubnetIndex
+
 Parameters:
+
+# ---------------- VPC PARAMETERS ----------------
 
   VPCName:
     Type: String
@@ -10,170 +35,31 @@ Parameters:
     Default: 192.168.0.0/16
 
 
-# -------- SUBNET PARAMETERS --------
+# ---------------- SUBNET PARAMETERS ----------------
 
-  Subnet1Enabled:
-    Type: String
-    Default: true
-    AllowedValues: [true, false]
+  SubnetCIDRs:
+    Type: List<String>
+    Description: "List of subnet CIDR blocks (max 8)"
 
-  Subnet1Name:
-    Type: String
+  SubnetAZs:
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+    Description: "AZs for subnets (order must match CIDR list)"
 
-  Subnet1Description:
-    Type: String
+  SubnetNames:
+    Type: List<String>
+    Description: "Names for each subnet"
 
-  Subnet1CIDR:
-    Type: String
-    Default: 192.168.1.0/24
-
-  Subnet1AZ:
-    Type: AWS::EC2::AvailabilityZone::Name
+  SubnetDescriptions:
+    Type: List<String>
+    Description: "Descriptions for each subnet"
 
 
-  Subnet2Enabled:
-    Type: String
-    Default: false
-    AllowedValues: [true, false]
+# ---------------- NAT CONFIG ----------------
 
-  Subnet2Name:
-    Type: String
-
-  Subnet2Description:
-    Type: String
-
-  Subnet2CIDR:
-    Type: String
-    Default: 192.168.2.0/24
-
-  Subnet2AZ:
-    Type: AWS::EC2::AvailabilityZone::Name
-
-
-  Subnet3Enabled:
-    Type: String
-    Default: false
-    AllowedValues: [true, false]
-
-  Subnet3Name:
-    Type: String
-
-  Subnet3Description:
-    Type: String
-
-  Subnet3CIDR:
-    Type: String
-    Default: 192.168.3.0/24
-
-  Subnet3AZ:
-    Type: AWS::EC2::AvailabilityZone::Name
-
-
-  Subnet4Enabled:
-    Type: String
-    Default: false
-    AllowedValues: [true, false]
-
-  Subnet4Name:
-    Type: String
-
-  Subnet4Description:
-    Type: String
-
-  Subnet4CIDR:
-    Type: String
-    Default: 192.168.4.0/24
-
-  Subnet4AZ:
-    Type: AWS::EC2::AvailabilityZone::Name
-
-
-  Subnet5Enabled:
-    Type: String
-    Default: false
-    AllowedValues: [true, false]
-
-  Subnet5Name:
-    Type: String
-
-  Subnet5Description:
-    Type: String
-
-  Subnet5CIDR:
-    Type: String
-    Default: 192.168.5.0/24
-
-  Subnet5AZ:
-    Type: AWS::EC2::AvailabilityZone::Name
-
-
-  Subnet6Enabled:
-    Type: String
-    Default: false
-    AllowedValues: [true, false]
-
-  Subnet6Name:
-    Type: String
-
-  Subnet6Description:
-    Type: String
-
-  Subnet6CIDR:
-    Type: String
-    Default: 192.168.6.0/24
-
-  Subnet6AZ:
-    Type: AWS::EC2::AvailabilityZone::Name
-
-
-  Subnet7Enabled:
-    Type: String
-    Default: false
-    AllowedValues: [true, false]
-
-  Subnet7Name:
-    Type: String
-
-  Subnet7Description:
-    Type: String
-
-  Subnet7CIDR:
-    Type: String
-    Default: 192.168.7.0/24
-
-  Subnet7AZ:
-    Type: AWS::EC2::AvailabilityZone::Name
-
-
-  Subnet8Enabled:
-    Type: String
-    Default: false
-    AllowedValues: [true, false]
-
-  Subnet8Name:
-    Type: String
-
-  Subnet8Description:
-    Type: String
-
-  Subnet8CIDR:
-    Type: String
-    Default: 192.168.8.0/24
-
-  Subnet8AZ:
-    Type: AWS::EC2::AvailabilityZone::Name
-
-
-Conditions:
-
-  CreateSubnet1: !Equals [!Ref Subnet1Enabled, true]
-  CreateSubnet2: !Equals [!Ref Subnet2Enabled, true]
-  CreateSubnet3: !Equals [!Ref Subnet3Enabled, true]
-  CreateSubnet4: !Equals [!Ref Subnet4Enabled, true]
-  CreateSubnet5: !Equals [!Ref Subnet5Enabled, true]
-  CreateSubnet6: !Equals [!Ref Subnet6Enabled, true]
-  CreateSubnet7: !Equals [!Ref Subnet7Enabled, true]
-  CreateSubnet8: !Equals [!Ref Subnet8Enabled, true]
+  NatGatewaySubnetIndex:
+    Type: Number
+    Default: 0
+    Description: "Index of subnet where NAT Gateway should be placed (0 = first subnet)"
 
 
 Resources:
@@ -191,7 +77,7 @@ Resources:
           Value: !Ref VPCName
 
 
-# ---------------- IGW ----------------
+# ---------------- INTERNET GATEWAY ----------------
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
@@ -203,7 +89,7 @@ Resources:
       VpcId: !Ref VPC
 
 
-# ---------------- NAT ----------------
+# ---------------- NAT EIP ----------------
 
   NatEIP:
     Type: AWS::EC2::EIP
@@ -212,169 +98,148 @@ Resources:
       Domain: vpc
 
 
-# NAT placed in subnet1 if created
-  NatGateway:
-    Type: AWS::EC2::NatGateway
-    Condition: CreateSubnet1
-    Properties:
-      AllocationId: !GetAtt NatEIP.AllocationId
-      SubnetId: !Ref Subnet1
-
-
 # ---------------- SUBNETS ----------------
 
   Subnet1:
     Type: AWS::EC2::Subnet
-    Condition: CreateSubnet1
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: !Ref Subnet1CIDR
-      AvailabilityZone: !Ref Subnet1AZ
+      CidrBlock: !Select [0, !Ref SubnetCIDRs]
+      AvailabilityZone: !Select [0, !Ref SubnetAZs]
       Tags:
         - Key: Name
-          Value: !Ref Subnet1Name
+          Value: !Select [0, !Ref SubnetNames]
         - Key: Description
-          Value: !Ref Subnet1Description
-
+          Value: !Select [0, !Ref SubnetDescriptions]
 
   Subnet2:
     Type: AWS::EC2::Subnet
-    Condition: CreateSubnet2
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: !Ref Subnet2CIDR
-      AvailabilityZone: !Ref Subnet2AZ
+      CidrBlock: !Select [1, !Ref SubnetCIDRs]
+      AvailabilityZone: !Select [1, !Ref SubnetAZs]
       Tags:
         - Key: Name
-          Value: !Ref Subnet2Name
+          Value: !Select [1, !Ref SubnetNames]
         - Key: Description
-          Value: !Ref Subnet2Description
-
+          Value: !Select [1, !Ref SubnetDescriptions]
 
   Subnet3:
     Type: AWS::EC2::Subnet
-    Condition: CreateSubnet3
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: !Ref Subnet3CIDR
-      AvailabilityZone: !Ref Subnet3AZ
+      CidrBlock: !Select [2, !Ref SubnetCIDRs]
+      AvailabilityZone: !Select [2, !Ref SubnetAZs]
       Tags:
         - Key: Name
-          Value: !Ref Subnet3Name
+          Value: !Select [2, !Ref SubnetNames]
         - Key: Description
-          Value: !Ref Subnet3Description
-
+          Value: !Select [2, !Ref SubnetDescriptions]
 
   Subnet4:
     Type: AWS::EC2::Subnet
-    Condition: CreateSubnet4
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: !Ref Subnet4CIDR
-      AvailabilityZone: !Ref Subnet4AZ
+      CidrBlock: !Select [3, !Ref SubnetCIDRs]
+      AvailabilityZone: !Select [3, !Ref SubnetAZs]
       Tags:
         - Key: Name
-          Value: !Ref Subnet4Name
+          Value: !Select [3, !Ref SubnetNames]
         - Key: Description
-          Value: !Ref Subnet4Description
-
+          Value: !Select [3, !Ref SubnetDescriptions]
 
   Subnet5:
     Type: AWS::EC2::Subnet
-    Condition: CreateSubnet5
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: !Ref Subnet5CIDR
-      AvailabilityZone: !Ref Subnet5AZ
+      CidrBlock: !Select [4, !Ref SubnetCIDRs]
+      AvailabilityZone: !Select [4, !Ref SubnetAZs]
       Tags:
         - Key: Name
-          Value: !Ref Subnet5Name
+          Value: !Select [4, !Ref SubnetNames]
         - Key: Description
-          Value: !Ref Subnet5Description
-
+          Value: !Select [4, !Ref SubnetDescriptions]
 
   Subnet6:
     Type: AWS::EC2::Subnet
-    Condition: CreateSubnet6
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: !Ref Subnet6CIDR
-      AvailabilityZone: !Ref Subnet6AZ
+      CidrBlock: !Select [5, !Ref SubnetCIDRs]
+      AvailabilityZone: !Select [5, !Ref SubnetAZs]
       Tags:
         - Key: Name
-          Value: !Ref Subnet6Name
+          Value: !Select [5, !Ref SubnetNames]
         - Key: Description
-          Value: !Ref Subnet6Description
-
+          Value: !Select [5, !Ref SubnetDescriptions]
 
   Subnet7:
     Type: AWS::EC2::Subnet
-    Condition: CreateSubnet7
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: !Ref Subnet7CIDR
-      AvailabilityZone: !Ref Subnet7AZ
+      CidrBlock: !Select [6, !Ref SubnetCIDRs]
+      AvailabilityZone: !Select [6, !Ref SubnetAZs]
       Tags:
         - Key: Name
-          Value: !Ref Subnet7Name
+          Value: !Select [6, !Ref SubnetNames]
         - Key: Description
-          Value: !Ref Subnet7Description
-
+          Value: !Select [6, !Ref SubnetDescriptions]
 
   Subnet8:
     Type: AWS::EC2::Subnet
-    Condition: CreateSubnet8
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: !Ref Subnet8CIDR
-      AvailabilityZone: !Ref Subnet8AZ
+      CidrBlock: !Select [7, !Ref SubnetCIDRs]
+      AvailabilityZone: !Select [7, !Ref SubnetAZs]
       Tags:
         - Key: Name
-          Value: !Ref Subnet8Name
+          Value: !Select [7, !Ref SubnetNames]
         - Key: Description
-          Value: !Ref Subnet8Description
+          Value: !Select [7, !Ref SubnetDescriptions]
+
+
+# ---------------- NAT GATEWAY ----------------
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatEIP.AllocationId
+      SubnetId: !Select
+        - !Ref NatGatewaySubnetIndex
+        - [!Ref Subnet1, !Ref Subnet2, !Ref Subnet3, !Ref Subnet4, !Ref Subnet5, !Ref Subnet6, !Ref Subnet7, !Ref Subnet8]
 
 
 Outputs:
 
+# ---------------- CORE OUTPUTS ----------------
+
   VPCId:
     Value: !Ref VPC
+    Export:
+      Name: !Sub "${AWS::StackName}-VPCId"
 
   InternetGatewayId:
     Value: !Ref InternetGateway
+    Export:
+      Name: !Sub "${AWS::StackName}-InternetGatewayId"
 
   NATGatewayId:
-    Condition: CreateSubnet1
     Value: !Ref NatGateway
+    Export:
+      Name: !Sub "${AWS::StackName}-NatGatewayId"
 
-  Subnet1Id:
-    Condition: CreateSubnet1
-    Value: !Ref Subnet1
 
-  Subnet2Id:
-    Condition: CreateSubnet2
-    Value: !Ref Subnet2
+# ---------------- SUBNET OUTPUTS ----------------
 
-  Subnet3Id:
-    Condition: CreateSubnet3
-    Value: !Ref Subnet3
+  SubnetIds:
+    Value: !Join
+      - ","
+      - [!Ref Subnet1, !Ref Subnet2, !Ref Subnet3, !Ref Subnet4, !Ref Subnet5, !Ref Subnet6, !Ref Subnet7, !Ref Subnet8]
+    Export:
+      Name: !Sub "${AWS::StackName}-SubnetIds"
 
-  Subnet4Id:
-    Condition: CreateSubnet4
-    Value: !Ref Subnet4
-
-  Subnet5Id:
-    Condition: CreateSubnet5
-    Value: !Ref Subnet5
-
-  Subnet6Id:
-    Condition: CreateSubnet6
-    Value: !Ref Subnet6
-
-  Subnet7Id:
-    Condition: CreateSubnet7
-    Value: !Ref Subnet7
-
-  Subnet8Id:
-    Condition: CreateSubnet8
-    Value: !Ref Subnet8
+  SubnetNamesOutput:
+    Value: !Join
+      - ","
+      - !Ref SubnetNames
+    Export:
+      Name: !Sub "${AWS::StackName}-SubnetNames"
