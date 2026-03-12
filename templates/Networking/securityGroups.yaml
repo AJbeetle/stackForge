@@ -1,0 +1,2 @@
+// As I add ALB, ASG, tasks and RDS, Reddis I will specify the security groups of each resource in this file to maintain a 
+single file to look for network security bugs

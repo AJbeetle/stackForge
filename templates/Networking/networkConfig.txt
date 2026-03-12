@@ -3,4 +3,8 @@ So, now in my network-config yaml add following things and give me the final com
 2. output subnet name and Id both alongside so user selects name then it automatically maps to the ID
 3. Suggest me how to improve NAT GATEWAY DEPENDENCY and then fix it in my YAML
 4. export outputs such a way that my routing-config stack can import 
-5. Finally use Scalable architecture that is Lists 
+5. Finally use Scalable architecture that is Lists : tried doing this but then in this scenerio user will have to manually 
+write down the AZs name in list [Cleaner UI but overhead of remembering AZ names]
+
+
+
