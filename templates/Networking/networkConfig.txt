@@ -8,3 +8,14 @@ write down the AZs name in list [Cleaner UI but overhead of remembering AZ names
 
 
 
+
+So, finally I am using network-automation.yaml which asks user only two things : CIDR and AZs So, the further task : 
+1. Creating SUBNETS FOR 3Tier architecture
+2. Creating IGW and NAT, and creating NAT in one of the public subnets
+3. Making Routing tables for each layer
+4. associating routing tables to the SUBNETS
+
+
+Updates to do : 
+1. Let user Name VPC
+2. Outputs should be in format : VPCName-ResourceName

@@ -241,21 +241,33 @@ Resources:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Public_RT_ECS3T
 
   UIRT:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: UI_RT_ECS3T
 
   BackendRT:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Backend_RT_ECS3T
 
   DatabaseRT:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Database_RT_ECS3T
 
 
 # ---------------- ROUTES ----------------
@@ -379,11 +391,43 @@ Outputs:
   PublicSubnetAZ1:
     Value: !Ref PublicSubnetAZ1
 
+  PublicSubnetAZ2:
+    Condition: UseAZ2
+    Value: !Ref PublicSubnetAZ2
+
+  PublicSubnetAZ3:
+    Condition: UseAZ3
+    Value: !Ref PublicSubnetAZ3
+
   UIPrivateSubnetAZ1:
     Value: !Ref UIPrivateSubnetAZ1
+
+  UIPrivateSubnetAZ2:
+    Condition: UseAZ2
+    Value: !Ref UIPrivateSubnetAZ2
+
+  UIPrivateSubnetAZ3:
+    Condition: UseAZ3
+    Value: !Ref UIPrivateSubnetAZ3
 
   BackendPrivateSubnetAZ1:
     Value: !Ref BackendPrivateSubnetAZ1
 
+  BackendPrivateSubnetAZ2:
+    Condition: UseAZ2
+    Value: !Ref BackendPrivateSubnetAZ2
+
+  BackendPrivateSubnetAZ3:
+    Condition: UseAZ3
+    Value: !Ref BackendPrivateSubnetAZ3
+
   DatabasePrivateSubnetAZ1:
     Value: !Ref DatabasePrivateSubnetAZ1
+
+  DatabasePrivateSubnetAZ2:
+    Condition: UseAZ2
+    Value: !Ref DatabasePrivateSubnetAZ2
+
+  DatabasePrivateSubnetAZ3:
+    Condition: UseAZ3
+    Value: !Ref DatabasePrivateSubnetAZ3
